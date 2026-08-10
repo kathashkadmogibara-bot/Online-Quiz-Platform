@@ -4,411 +4,134 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MCQ Quiz</title>
+
+  <!-- Main CSS -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Test/Quiz CSS -->
+  <link rel="stylesheet" href="test.css">
 </head>
 
 <body>
 
   <div class="quiz-container">
 
-    <div id="quiz-header">
+    <header class="quiz-header">
       <h1>MCQ Quiz</h1>
-      <div id="progress">Question 1 / 50</div>
-    </div>
+      <p id="quizInfo">Choose your subject and class</p>
+    </header>
 
-    <div id="question-box">
-      <h2 id="question">Loading question...</h2>
+    <!-- SUBJECT MENU -->
+    <section id="subjectMenu" class="menu-section">
+      <h2>Which Subject MCQ You Want?</h2>
 
-      <div id="options">
-        <button class="option" onclick="selectAnswer(0)"></button>
-        <button class="option" onclick="selectAnswer(1)"></button>
-        <button class="option" onclick="selectAnswer(2)"></button>
-        <button class="option" onclick="selectAnswer(3)"></button>
+      <button onclick="selectSubject('General Science')">
+        GENERAL SCIENCE
+      </button>
+
+      <button onclick="selectSubject('Mathematics')">
+        MATHEMATICS
+      </button>
+
+      <button onclick="selectSubject('Social Science')">
+        SOCIAL SCIENCE
+      </button>
+
+      <button onclick="selectSubject('English')">
+        ENGLISH
+      </button>
+
+      <button onclick="selectSubject('ALL')">
+        ALL SUBJECTS
+      </button>
+    </section>
+
+
+    <!-- CLASS MENU -->
+    <section id="classMenu" class="menu-section" style="display:none;">
+      <h2>Select Class</h2>
+
+      <button onclick="selectClass('9th')">
+        CLASS → 9TH
+      </button>
+
+      <button onclick="selectClass('10th')">
+        CLASS → 10TH
+      </button>
+
+      <button onclick="selectClass('11th')">
+        CLASS → 11TH
+      </button>
+
+      <button onclick="selectClass('12th')">
+        CLASS → 12TH
+      </button>
+
+      <button onclick="goBackToSubjects()">
+        ← BACK
+      </button>
+    </section>
+
+
+    <!-- QUIZ SECTION -->
+    <section id="quizSection" class="quiz-section" style="display:none;">
+
+      <div class="quiz-top">
+        <span id="questionNumber">Question 1 / 50</span>
+        <span id="score">Score: 0</span>
       </div>
-    </div>
 
-    <button id="nextBtn" onclick="nextQuestion()" disabled>
-      Next
-    </button>
+      <div class="progress-container">
+        <div id="progressBar"></div>
+      </div>
 
-    <div id="result" style="display:none;">
+      <div class="question-box">
+        <h2 id="questionText">Question will appear here</h2>
+      </div>
+
+      <div id="optionsContainer" class="options-container">
+        <!-- Options will be created by test.js -->
+      </div>
+
+      <div class="quiz-buttons">
+
+        <button id="nextButton" onclick="nextQuestion()" disabled>
+          NEXT
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- RESULT SECTION -->
+    <section id="resultSection" class="result-section" style="display:none;">
+
       <h2>Quiz Completed 🎉</h2>
-      <p id="score"></p>
-      <button onclick="restartQuiz()">Play Again</button>
-    </div>
+
+      <p id="finalScore">
+        Your Score: 0 / 50
+      </p>
+
+      <p id="resultMessage">
+        Good job!
+      </p>
+
+      <button onclick="restartQuiz()">
+        TRY AGAIN
+      </button>
+
+      <button onclick="backToMenu()">
+        BACK TO MENU
+      </button>
+
+    </section>
 
   </div>
 
-<script>
-/* =========================================
-   QUIZ SETTINGS
-========================================= */
 
-const TOTAL_QUESTIONS = 50;
-
-
-/* =========================================
-   GET SELECTED SUBJECT & CLASS
-========================================= */
-
-const subject = localStorage.getItem("selectedSubject") || "GENERAL SCIENCE";
-const selectedClass = localStorage.getItem("selectedClass") || "9TH";
-
-
-/* =========================================
-   QUESTION DATABASE
-   You can connect the large 3200-question
-   database here later.
-========================================= */
-
-const questionDatabase = {
-
-  "GENERAL SCIENCE": {
-    "9TH": [],
-    "10TH": [],
-    "11TH": [],
-    "12TH": []
-  },
-
-  "MATHEMATICS": {
-    "9TH": [],
-    "10TH": [],
-    "11TH": [],
-    "12TH": []
-  },
-
-  "SOCIAL SCIENCE": {
-    "9TH": [],
-    "10TH": [],
-    "11TH": [],
-    "12TH": []
-  },
-
-  "ENGLISH": {
-    "9TH": [],
-    "10TH": [],
-    "11TH": [],
-    "12TH": []
-  }
-};
-
-
-/* =========================================
-   MATH RANDOM NUMBER TRICK
-========================================= */
-
-/*
-   Example:
-
-   X - Z = Y
-
-   X = random number
-   Z = random number
-   Y = calculated answer
-
-   This allows Mathematics questions
-   to generate different numbers.
-*/
-
-function randomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-
-function createMathQuestion() {
-
-  const x = randomNumber(10, 100);
-  const z = randomNumber(1, x - 1);
-  const y = x - z;
-
-  return {
-    question: `${x} - ${z} = ?`,
-    options: generateOptions(y),
-    answer: y
-  };
-}
-
-
-function generateOptions(correctAnswer) {
-
-  const answers = new Set();
-
-  answers.add(correctAnswer);
-
-  while (answers.size < 4) {
-
-    const variation = randomNumber(-10, 10);
-
-    if (variation !== 0) {
-      answers.add(correctAnswer + variation);
-    }
-  }
-
-  const array = Array.from(answers);
-
-  return shuffle(array);
-}
-
-
-/* =========================================
-   SHUFFLE FUNCTION
-========================================= */
-
-function shuffle(array) {
-
-  for (let i = array.length - 1; i > 0; i--) {
-
-    const j = Math.floor(Math.random() * (i + 1));
-
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-
-  return array;
-}
-
-
-/* =========================================
-   LOAD QUESTIONS
-========================================= */
-
-let questions = [];
-
-function loadQuestions() {
-
-  const subjectData = questionDatabase[subject];
-
-  if (subjectData && subjectData[selectedClass]) {
-
-    questions = [...subjectData[selectedClass]];
-  }
-
-
-  /*
-     Mathematics can generate unlimited
-     random-number questions.
-  */
-
-  if (subject === "MATHEMATICS") {
-
-    for (let i = 0; i < TOTAL_QUESTIONS; i++) {
-
-      questions.push(createMathQuestion());
-    }
-  }
-
-
-  /*
-     Shuffle questions.
-  */
-
-  questions = shuffle(questions);
-
-
-  /*
-     Maximum 50 questions.
-  */
-
-  questions = questions.slice(0, TOTAL_QUESTIONS);
-
-
-  /*
-     If database is empty.
-  */
-
-  if (questions.length === 0) {
-
-    document.getElementById("question").textContent =
-      "No questions available yet.";
-
-    document.getElementById("options").style.display = "none";
-
-    document.getElementById("nextBtn").style.display = "none";
-
-    return;
-  }
-
-  showQuestion();
-}
-
-
-/* =========================================
-   QUIZ VARIABLES
-========================================= */
-
-let currentQuestion = 0;
-let score = 0;
-let answered = false;
-
-
-/* =========================================
-   SHOW QUESTION
-========================================= */
-
-function showQuestion() {
-
-  answered = false;
-
-  const q = questions[currentQuestion];
-
-  document.getElementById("question").textContent =
-    q.question;
-
-  document.getElementById("progress").textContent =
-    `Question ${currentQuestion + 1} / ${questions.length}`;
-
-
-  const optionButtons =
-    document.querySelectorAll(".option");
-
-
-  optionButtons.forEach((button, index) => {
-
-    button.disabled = false;
-
-    button.classList.remove("correct");
-    button.classList.remove("wrong");
-
-    button.textContent =
-      q.options[index];
-
-  });
-
-
-  document.getElementById("nextBtn").disabled = true;
-}
-
-
-/* =========================================
-   SELECT ANSWER
-========================================= */
-
-function selectAnswer(index) {
-
-  if (answered) return;
-
-  answered = true;
-
-  const q = questions[currentQuestion];
-
-  const selected =
-    q.options[index];
-
-  const optionButtons =
-    document.querySelectorAll(".option");
-
-
-  if (Number(selected) === Number(q.answer)) {
-
-    score++;
-
-    optionButtons[index].classList.add("correct");
-
-  } else {
-
-    optionButtons[index].classList.add("wrong");
-
-
-    q.options.forEach((option, i) => {
-
-      if (Number(option) === Number(q.answer)) {
-
-        optionButtons[i].classList.add("correct");
-
-      }
-
-    });
-  }
-
-
-  optionButtons.forEach(button => {
-
-    button.disabled = true;
-
-  });
-
-
-  document.getElementById("nextBtn").disabled = false;
-}
-
-
-/* =========================================
-   NEXT QUESTION
-========================================= */
-
-function nextQuestion() {
-
-  if (!answered) return;
-
-  currentQuestion++;
-
-  if (currentQuestion >= questions.length) {
-
-    showResult();
-
-  } else {
-
-    showQuestion();
-
-  }
-}
-
-
-/* =========================================
-   SHOW RESULT
-========================================= */
-
-function showResult() {
-
-  document.getElementById("question-box").style.display =
-    "none";
-
-  document.getElementById("nextBtn").style.display =
-    "none";
-
-  document.getElementById("quiz-header").style.display =
-    "none";
-
-  document.getElementById("result").style.display =
-    "block";
-
-
-  document.getElementById("score").textContent =
-    `Your Score: ${score} / ${questions.length}`;
-}
-
-
-/* =========================================
-   RESTART QUIZ
-========================================= */
-
-function restartQuiz() {
-
-  currentQuestion = 0;
-  score = 0;
-
-  document.getElementById("result").style.display =
-    "none";
-
-  document.getElementById("quiz-header").style.display =
-    "block";
-
-  document.getElementById("question-box").style.display =
-    "block";
-
-  document.getElementById("nextBtn").style.display =
-    "block";
-
-  loadQuestions();
-}
-
-
-/* =========================================
-   START
-========================================= */
-
-loadQuestions();
-
-</script>
+  <!-- Quiz JavaScript -->
+  <script src="test.js"></script>
 
 </body>
 </html>
