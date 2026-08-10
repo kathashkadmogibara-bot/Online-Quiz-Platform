@@ -1,0 +1,152 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.quiz-container {
+  width: 100%;
+  max-width: 700px;
+  background: white;
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+#quiz-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+#quiz-header h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+#progress {
+  font-size: 15px;
+  color: #666;
+}
+
+#question-box {
+  margin-bottom: 20px;
+}
+
+#question {
+  font-size: 21px;
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+#options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.option {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  background: white;
+  font-size: 17px;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.option:hover:not(:disabled) {
+  border-color: #555;
+  background: #f5f5f5;
+}
+
+.option:disabled {
+  cursor: default;
+}
+
+.option.correct {
+  border-color: #22a06b;
+  background: #e7f8ef;
+}
+
+.option.wrong {
+  border-color: #e05252;
+  background: #fdeaea;
+}
+
+#nextBtn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: #222;
+  color: white;
+  font-size: 17px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#nextBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#result {
+  text-align: center;
+  padding: 25px 10px;
+}
+
+#result h2 {
+  font-size: 27px;
+  margin-bottom: 15px;
+}
+
+#score {
+  font-size: 20px;
+  margin-bottom: 25px;
+}
+
+#result button {
+  padding: 13px 25px;
+  border: none;
+  border-radius: 10px;
+  background: #222;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 12px;
+  }
+
+  .quiz-container {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  #quiz-header h1 {
+    font-size: 24px;
+  }
+
+  #question {
+    font-size: 18px;
+  }
+
+  .option {
+    font-size: 16px;
+    padding: 14px;
+  }
+}
