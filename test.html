@@ -6,123 +6,370 @@
 
   <title>MCQ Quiz</title>
 
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="test.css">
 </head>
 
 <body>
 
-  <div class="quiz-container">
+  <!-- =========================
+       SUBJECT MENU
+  ========================== -->
+  <section id="subjectScreen" class="screen active">
 
-    <!-- HEADER -->
-    <div class="quiz-header">
-      <h1>MCQ Quiz</h1>
+    <div class="quiz-box">
 
-      <div class="question-count">
-        Question
-        <span id="currentQuestion">1</span>
-        /
-        <span id="totalQuestions">15</span>
+      <h1>Which Subject MCQ You Want?</h1>
+
+      <button class="subject-btn" onclick="selectSubject('general')">
+        GENERAL SCIENCE
+      </button>
+
+      <button class="subject-btn" onclick="selectSubject('math')">
+        MATHEMATICS
+      </button>
+
+      <button class="subject-btn" onclick="selectSubject('social')">
+        SOCIAL SCIENCE
+      </button>
+
+      <button class="subject-btn" onclick="selectSubject('english')">
+        ENGLISH
+      </button>
+
+      <button class="subject-btn" onclick="selectSubject('all')">
+        ALL SUBJECTS
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       CLASS MENU
+  ========================== -->
+  <section id="classScreen" class="screen">
+
+    <div class="quiz-box">
+
+      <h1 id="classTitle">Choose Class</h1>
+
+      <button class="class-btn" onclick="selectClass(9)">
+        CLASS → 9TH
+      </button>
+
+      <button class="class-btn" onclick="selectClass(10)">
+        CLASS → 10TH
+      </button>
+
+      <button class="class-btn" onclick="selectClass(11)">
+        CLASS → 11TH
+      </button>
+
+      <button class="class-btn" onclick="selectClass(12)">
+        CLASS → 12TH
+      </button>
+
+      <button class="back-menu-btn" onclick="goToSubjects()">
+        ← BACK
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       QUIZ SCREEN
+  ========================== -->
+  <section id="quizScreen" class="screen">
+
+    <div class="quiz-layout">
+
+      <!-- MAIN QUIZ -->
+      <div class="quiz-main">
+
+        <div class="quiz-header">
+
+          <div>
+            <span id="subjectName">Subject</span>
+            <span> | </span>
+            <span id="className">Class</span>
+          </div>
+
+          <div>
+            Question
+            <span id="questionNumber">1</span>
+            /
+            <span id="totalQuestions">15</span>
+          </div>
+
+        </div>
+
+
+        <!-- TIMER -->
+        <div class="timer-box">
+
+          <div class="timer-label">
+            Time Left
+          </div>
+
+          <div id="timer">
+            01:00
+          </div>
+
+        </div>
+
+
+        <!-- PROGRESS -->
+        <div class="progress-container">
+
+          <div
+            id="progressBar"
+            class="progress-bar">
+          </div>
+
+        </div>
+
+
+        <!-- QUESTION -->
+        <div class="question-box">
+
+          <h2 id="questionText">
+            Loading question...
+          </h2>
+
+        </div>
+
+
+        <!-- OPTIONS -->
+        <div id="optionsContainer" class="options-container">
+
+        </div>
+
+
+        <!-- BUTTONS -->
+        <div class="quiz-buttons">
+
+          <button
+            id="backButton"
+            onclick="previousQuestion()">
+            ← Back
+          </button>
+
+          <button
+            id="skipButton"
+            onclick="skipQuestion()">
+            Skip
+          </button>
+
+          <button
+            id="saveNextButton"
+            onclick="saveAndNext()">
+            Save & Next →
+          </button>
+
+          <button
+            id="nextButton"
+            onclick="nextQuestion()">
+            Next →
+          </button>
+
+        </div>
+
       </div>
+
+
+      <!-- =========================
+           SIDE PANEL
+      ========================== -->
+      <aside class="quiz-sidebar">
+
+        <h2>Quiz Analytics</h2>
+
+        <div class="side-card">
+
+          <span>Questions</span>
+
+          <strong id="sideQuestion">
+            1 / 15
+          </strong>
+
+        </div>
+
+
+        <div class="side-card">
+
+          <span>Answered</span>
+
+          <strong id="answeredCount">
+            0
+          </strong>
+
+        </div>
+
+
+        <div class="side-card">
+
+          <span>Correct</span>
+
+          <strong id="correctCount">
+            0
+          </strong>
+
+        </div>
+
+
+        <div class="side-card">
+
+          <span>Wrong</span>
+
+          <strong id="wrongCount">
+            0
+          </strong>
+
+        </div>
+
+
+        <div class="side-card">
+
+          <span>Skipped</span>
+
+          <strong id="skippedCount">
+            0
+          </strong>
+
+        </div>
+
+
+        <div class="side-card">
+
+          <span>Time Used</span>
+
+          <strong id="timeUsed">
+            0:00
+          </strong>
+
+        </div>
+
+      </aside>
+
     </div>
 
-
-    <!-- TIMER -->
-    <div class="timer-box">
-      ⏱️ Time Left:
-      <strong>
-        <span id="timer">10</span>s
-      </strong>
-    </div>
+  </section>
 
 
-    <!-- PROGRESS -->
-    <div class="progress">
-      <div id="progressBar"></div>
-    </div>
+  <!-- =========================
+       RESULT SCREEN
+  ========================== -->
+  <section id="resultScreen" class="screen">
+
+    <div class="result-box">
+
+      <h1>Quiz Complete 🎉</h1>
+
+      <div class="result-circle" id="resultCircle">
+
+        <span id="resultPercent">
+          0%
+        </span>
+
+      </div>
 
 
-    <!-- QUESTION -->
-    <div class="question-box">
-
-      <h2 id="question">
-        Loading question...
+      <h2 id="resultMessage">
+        Result
       </h2>
 
-      <div id="options"></div>
+
+      <div class="result-info">
+
+        <div>
+          <span>Marks</span>
+          <strong id="finalMarks">
+            0 / 15
+          </strong>
+        </div>
+
+        <div>
+          <span>Correct</span>
+          <strong id="finalCorrect">
+            0
+          </strong>
+        </div>
+
+        <div>
+          <span>Wrong</span>
+          <strong id="finalWrong">
+            0
+          </strong>
+        </div>
+
+        <div>
+          <span>Skipped</span>
+          <strong id="finalSkipped">
+            0
+          </strong>
+        </div>
+
+        <div>
+          <span>Total Time</span>
+          <strong id="finalTime">
+            0:00
+          </strong>
+        </div>
+
+        <div>
+          <span>Questions / Minute</span>
+          <strong id="questionsPerMinute">
+            0
+          </strong>
+        </div>
+
+      </div>
+
+
+      <!-- RESULT LEVEL -->
+      <div id="resultLevel" class="result-level">
+        🔴
+      </div>
+
+
+      <button onclick="restartQuiz()" class="restart-btn">
+        Try Again
+      </button>
+
+      <button onclick="goToSubjects()" class="home-btn">
+        Choose Another Subject
+      </button>
 
     </div>
 
-
-    <!-- BUTTONS -->
-    <div class="navigation">
-
-      <button
-        id="backBtn"
-        class="nav-btn"
-        type="button">
-        ◀ Back
-      </button>
+  </section>
 
 
-      <button
-        id="skipBtn"
-        class="nav-btn"
-        type="button">
-        Skip
-      </button>
+  <!-- =========================
+       QUESTION DATA FILES
+  ========================== -->
 
-
-      <button
-        id="saveNextBtn"
-        class="save-btn"
-        type="button">
-        Save & Next
-      </button>
-
-    </div>
-
-
-    <!-- RESULT -->
-    <div
-      id="resultBox"
-      class="result-box hidden">
-
-      <h2>
-        Quiz Complete 🎉
-      </h2>
-
-      <p>
-        Your Score:
-        <strong>
-          <span id="score">0</span>
-        </strong>
-        /
-        <strong>15</strong>
-      </p>
-
-      <button
-        onclick="location.reload()"
-        class="restart-btn"
-        type="button">
-        Restart Quiz
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <!-- QUESTION FILES -->
-
+  <!-- Main question file -->
   <script src="questions.js"></script>
+
+  <!-- Mathematics -->
   <script src="questions-math.js"></script>
+
+  <!-- Science -->
   <script src="questions-science.js"></script>
+
+  <!-- Social Science -->
   <script src="questions-social.js"></script>
+
+  <!-- English -->
   <script src="questions-english.js"></script>
 
 
   <!-- QUIZ JAVASCRIPT -->
-
   <script src="test.js"></script>
 
 </body>
