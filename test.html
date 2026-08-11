@@ -1,137 +1,162 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MCQ Quiz</title>
-
-  <!-- Main CSS -->
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Test/Quiz CSS -->
-  <link rel="stylesheet" href="test.css">
-</head>
-
-<body>
-
-  <div class="quiz-container">
-
-    <header class="quiz-header">
-      <h1>MCQ Quiz</h1>
-      <p id="quizInfo">Choose your subject and class</p>
-    </header>
-
-    <!-- SUBJECT MENU -->
-    <section id="subjectMenu" class="menu-section">
-      <h2>Which Subject MCQ You Want?</h2>
-
-      <button onclick="selectSubject('General Science')">
-        GENERAL SCIENCE
-      </button>
-
-      <button onclick="selectSubject('Mathematics')">
-        MATHEMATICS
-      </button>
-
-      <button onclick="selectSubject('Social Science')">
-        SOCIAL SCIENCE
-      </button>
-
-      <button onclick="selectSubject('English')">
-        ENGLISH
-      </button>
-
-      <button onclick="selectSubject('ALL')">
-        ALL SUBJECTS
-      </button>
-    </section>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>MCQ Quiz</title>  <!-- Main CSS -->  <link rel="stylesheet" href="style.css">  <!-- Quiz CSS -->  <link rel="stylesheet" href="test.css">
+</head><body>  <div class="quiz-container"><!-- HEADER -->
+<header class="quiz-header">
+  <h1>MCQ Quiz</h1>
+  <p id="quizInfo">Choose your subject and class</p>
+</header>
 
 
-    <!-- CLASS MENU -->
-    <section id="classMenu" class="menu-section" style="display:none;">
-      <h2>Select Class</h2>
+<!-- ========================= -->
+<!-- SUBJECT MENU -->
+<!-- ========================= -->
 
-      <button onclick="selectClass('9th')">
-        CLASS → 9TH
-      </button>
+<section id="subjectMenu" class="menu-section">
 
-      <button onclick="selectClass('10th')">
-        CLASS → 10TH
-      </button>
+  <h2>Which Subject MCQ You Want?</h2>
 
-      <button onclick="selectClass('11th')">
-        CLASS → 11TH
-      </button>
+  <button onclick="selectSubject('General Science')">
+    GENERAL SCIENCE
+  </button>
 
-      <button onclick="selectClass('12th')">
-        CLASS → 12TH
-      </button>
+  <button onclick="selectSubject('Mathematics')">
+    MATHEMATICS
+  </button>
 
-      <button onclick="goBackToSubjects()">
-        ← BACK
-      </button>
-    </section>
+  <button onclick="selectSubject('Social Science')">
+    SOCIAL SCIENCE
+  </button>
 
+  <button onclick="selectSubject('English')">
+    ENGLISH
+  </button>
 
-    <!-- QUIZ SECTION -->
-    <section id="quizSection" class="quiz-section" style="display:none;">
+  <button onclick="selectSubject('ALL')">
+    ALL SUBJECTS
+  </button>
 
-      <div class="quiz-top">
-        <span id="questionNumber">Question 1 / 50</span>
-        <span id="score">Score: 0</span>
-      </div>
-
-      <div class="progress-container">
-        <div id="progressBar"></div>
-      </div>
-
-      <div class="question-box">
-        <h2 id="questionText">Question will appear here</h2>
-      </div>
-
-      <div id="optionsContainer" class="options-container">
-        <!-- Options will be created by test.js -->
-      </div>
-
-      <div class="quiz-buttons">
-
-        <button id="nextButton" onclick="nextQuestion()" disabled>
-          NEXT
-        </button>
-
-      </div>
-
-    </section>
+</section>
 
 
-    <!-- RESULT SECTION -->
-    <section id="resultSection" class="result-section" style="display:none;">
+<!-- ========================= -->
+<!-- CLASS MENU -->
+<!-- ========================= -->
 
-      <h2>Quiz Completed 🎉</h2>
+<section id="classMenu" class="menu-section" style="display: none;">
 
-      <p id="finalScore">
-        Your Score: 0 / 50
-      </p>
+  <h2>Select Class</h2>
 
-      <p id="resultMessage">
-        Good job!
-      </p>
+  <button onclick="selectClass('9th')">
+    CLASS → 9TH
+  </button>
 
-      <button onclick="restartQuiz()">
-        TRY AGAIN
-      </button>
+  <button onclick="selectClass('10th')">
+    CLASS → 10TH
+  </button>
 
-      <button onclick="backToMenu()">
-        BACK TO MENU
-      </button>
+  <button onclick="selectClass('11th')">
+    CLASS → 11TH
+  </button>
 
-    </section>
+  <button onclick="selectClass('12th')">
+    CLASS → 12TH
+  </button>
+
+  <button onclick="goBackToSubjects()">
+    ← BACK
+  </button>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- QUIZ SECTION -->
+<!-- ========================= -->
+
+<section id="quizSection" class="quiz-section" style="display: none;">
+
+  <div class="quiz-top">
+
+    <span id="questionNumber">
+      Question 1 / 50
+    </span>
+
+    <span id="score">
+      Score: 0
+    </span>
 
   </div>
 
 
-  <!-- Quiz JavaScript -->
-  <script src="test.js"></script>
+  <!-- PROGRESS BAR -->
 
-</body>
+  <div class="progress-container">
+
+    <div id="progressBar"></div>
+
+  </div>
+
+
+  <!-- QUESTION -->
+
+  <div class="question-box">
+
+    <h2 id="questionText">
+      Question will appear here
+    </h2>
+
+  </div>
+
+
+  <!-- ANSWER OPTIONS -->
+
+  <div id="optionsContainer" class="options-container">
+
+  </div>
+
+
+  <!-- NEXT BUTTON -->
+
+  <div class="quiz-buttons">
+
+    <button id="nextButton" onclick="nextQuestion()" disabled>
+      NEXT
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- RESULT SECTION -->
+<!-- ========================= -->
+
+<section id="resultSection" class="result-section" style="display: none;">
+
+  <h2>
+    Quiz Completed 🎉
+  </h2>
+
+  <p id="finalScore">
+    Your Score: 0 / 50
+  </p>
+
+  <p id="resultMessage">
+    Good job!
+  </p>
+
+  <button onclick="restartQuiz()">
+    TRY AGAIN
+  </button>
+
+  <button onclick="backToMenu()">
+    BACK TO MENU
+  </button>
+
+</section>
+
+  </div>  <!-- ================================= -->  <!-- QUESTION DATABASE -->  <!-- MUST COME BEFORE test.js -->  <!-- ================================= -->  <script src="questions.js"></script>  <!-- ================================= -->  <!-- QUIZ JAVASCRIPT -->  <!-- ================================= -->  <script src="test.js"></script></body>
 </html>
