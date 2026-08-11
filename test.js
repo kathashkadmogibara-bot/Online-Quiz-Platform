@@ -1,422 +1,419 @@
-const TOTAL_QUESTIONS = 50;
+// ==========================================
+// MCQ QUIZ SETTINGS
+// ==========================================
 
-const subject =
-  localStorage.getItem("selectedSubject") || "GENERAL SCIENCE";
+const QUESTIONS_PER_QUIZ = 15;
+const SECONDS_PER_QUESTION = 10;
 
-const selectedClass =
-  localStorage.getItem("selectedClass") || "9TH";
+// ==========================================
+// GET QUESTIONS
+// ==========================================
 
-let questions = [];
-let currentQuestion = 0;
-let score = 0;
-let answered = false;
+// Supports the question files you already created.
+let allQuestions = [];
 
-
-/* ================================
-   QUESTION DATABASE
-================================ */
-
-const questionDatabase = {
-
-  "GENERAL SCIENCE": {
-    "9TH": [],
-    "10TH": [],
-    "11TH": [],
-    "12TH": []
-  },
-
-  "MATHEMATICS": {
-    "9TH": [],
-    "10TH": [],
-    "11TH": [],
-    "12TH": []
-  },
-
-  "SOCIAL SCIENCE": {
-    "9TH": [],
-    "10TH": [],
-    "11TH": [],
-    "12TH": []
-  },
-
-  "ENGLISH": {
-    "9TH": [],
-    "10TH": [],
-    "11TH": [],
-    "12TH": []
-  }
-
-};
-
-
-/* ================================
-   RANDOM NUMBER
-================================ */
-
-function randomNumber(min, max) {
-  return Math.floor(
-    Math.random() * (max - min + 1)
-  ) + min;
+if (typeof questions !== "undefined" && Array.isArray(questions)) {
+  allQuestions = questions;
 }
 
+// Other possible question variable names
+if (typeof mathQuestions !== "undefined") {
+  allQuestions = allQuestions.concat(mathQuestions);
+}
 
-/* ================================
-   SHUFFLE
-================================ */
+if (typeof scienceQuestions !== "undefined") {
+  allQuestions = allQuestions.concat(scienceQuestions);
+}
+
+if (typeof socialQuestions !== "undefined") {
+  allQuestions = allQuestions.concat(socialQuestions);
+}
+
+if (typeof englishQuestions !== "undefined") {
+  allQuestions = allQuestions.concat(englishQuestions);
+}
+
+// ==========================================
+// RANDOM SHUFFLE
+// ==========================================
 
 function shuffle(array) {
+  const arr = [...array];
 
-  for (let i = array.length - 1; i > 0; i--) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
 
-    const j = Math.floor(
-      Math.random() * (i + 1)
-    );
-
-    [array[i], array[j]] =
-      [array[j], array[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 
-  return array;
+  return arr;
 }
 
+// ==========================================
+// CREATE 15 RANDOM QUESTIONS
+// ==========================================
 
-/* ================================
-   MATH RANDOM QUESTION
-================================ */
+let quizQuestions = shuffle(allQuestions).slice(
+  0,
+  Math.min(QUESTIONS_PER_QUIZ, allQuestions.length)
+);
 
-/*
-   X - Z = Y
+// ==========================================
+// QUIZ DATA
+// ==========================================
 
-   X = random
-   Z = random
-   Y = calculated
+let currentIndex = 0;
 
-   Har baar alag numbers aa sakte hain.
-*/
+let selectedAnswers = new Array(
+  quizQuestions.length
+).fill(null);
 
-function createMathQuestion() {
+let timer = SECONDS_PER_QUESTION;
+let timerInterval = null;
 
-  const x = randomNumber(10, 100);
-  const z = randomNumber(1, x - 1);
+// ==========================================
+// HTML ELEMENTS
+// ==========================================
 
-  const y = x - z;
+const questionElement =
+  document.getElementById("question");
 
-  return {
+const optionsElement =
+  document.getElementById("options");
 
-    question: `${x} - ${z} = ?`,
+const currentQuestionElement =
+  document.getElementById("currentQuestion");
 
-    options: generateMathOptions(y),
+const totalQuestionsElement =
+  document.getElementById("totalQuestions");
 
-    answer: y
+const timerElement =
+  document.getElementById("timer");
 
-  };
-}
+const progressBar =
+  document.getElementById("progressBar");
 
+const backBtn =
+  document.getElementById("backBtn");
 
-/* ================================
-   MATH OPTIONS
-================================ */
+const skipBtn =
+  document.getElementById("skipBtn");
 
-function generateMathOptions(correctAnswer) {
+const saveNextBtn =
+  document.getElementById("saveNextBtn");
 
-  const answers = new Set();
+const resultBox =
+  document.getElementById("resultBox");
 
-  answers.add(correctAnswer);
+const scoreElement =
+  document.getElementById("score");
 
-  while (answers.size < 4) {
+// ==========================================
+// START
+// ==========================================
 
-    const wrongAnswer =
-      correctAnswer +
-      randomNumber(-10, 10);
+totalQuestionsElement.textContent =
+  quizQuestions.length;
 
-    if (wrongAnswer !== correctAnswer) {
-      answers.add(wrongAnswer);
-    }
-  }
+if (quizQuestions.length === 0) {
 
-  return shuffle(
-    Array.from(answers)
-  );
-}
+  questionElement.textContent =
+    "No questions found.";
 
+  optionsElement.innerHTML =
+    "<p>Please check your question files.</p>";
 
-/* ================================
-   LOAD QUESTIONS
-================================ */
+  backBtn.disabled = true;
+  skipBtn.disabled = true;
+  saveNextBtn.disabled = true;
 
-function loadQuestions() {
-
-  questions = [];
-
-  const subjectData =
-    questionDatabase[subject];
-
-  if (
-    subjectData &&
-    subjectData[selectedClass]
-  ) {
-
-    questions =
-      [...subjectData[selectedClass]];
-
-  }
-
-
-  /*
-     Mathematics ke questions
-     random generate honge.
-  */
-
-  if (subject === "MATHEMATICS") {
-
-    for (
-      let i = 0;
-      i < TOTAL_QUESTIONS;
-      i++
-    ) {
-
-      questions.push(
-        createMathQuestion()
-      );
-
-    }
-  }
-
-
-  /*
-     Question order random.
-  */
-
-  questions = shuffle(questions);
-
-
-  /*
-     Maximum 50.
-  */
-
-  questions =
-    questions.slice(
-      0,
-      TOTAL_QUESTIONS
-    );
-
-
-  if (questions.length === 0) {
-
-    document.getElementById("question")
-      .textContent =
-      "No questions available yet.";
-
-    document.getElementById("options")
-      .style.display = "none";
-
-    document.getElementById("nextBtn")
-      .style.display = "none";
-
-    return;
-  }
-
+} else {
 
   showQuestion();
 }
 
-
-/* ================================
-   SHOW QUESTION
-================================ */
+// ==========================================
+// SHOW QUESTION
+// ==========================================
 
 function showQuestion() {
 
-  answered = false;
+  clearInterval(timerInterval);
 
-  const q =
-    questions[currentQuestion];
+  const q = quizQuestions[currentIndex];
 
+  currentQuestionElement.textContent =
+    currentIndex + 1;
 
-  document.getElementById("question")
-    .textContent =
-    q.question;
+  totalQuestionsElement.textContent =
+    quizQuestions.length;
 
+  questionElement.textContent =
+    q.question || q.q || "Question unavailable";
 
-  document.getElementById("progress")
-    .textContent =
-    `Question ${currentQuestion + 1} / ${questions.length}`;
+  optionsElement.innerHTML = "";
 
+  let options = q.options || q.answers || [];
 
-  const buttons =
-    document.querySelectorAll(".option");
+  options.forEach((option, index) => {
 
+    const button = document.createElement("button");
 
-  buttons.forEach(
-    (button, index) => {
+    button.className = "option";
 
-      button.disabled = false;
+    button.textContent =
+      option;
 
-      button.classList.remove(
-        "correct",
-        "wrong"
-      );
-
-      button.textContent =
-        q.options[index];
-
+    if (
+      selectedAnswers[currentIndex] === index
+    ) {
+      button.classList.add("selected");
     }
-  );
 
+    button.addEventListener("click", () => {
 
-  document.getElementById("nextBtn")
-    .disabled = true;
+      selectedAnswers[currentIndex] =
+        index;
+
+      document
+        .querySelectorAll(".option")
+        .forEach(btn => {
+          btn.classList.remove("selected");
+        });
+
+      button.classList.add("selected");
+    });
+
+    optionsElement.appendChild(button);
+  });
+
+  updateButtons();
+
+  updateProgress();
+
+  startTimer();
 }
 
+// ==========================================
+// TIMER
+// ==========================================
 
-/* ================================
-   SELECT ANSWER
-================================ */
+function startTimer() {
 
-function selectAnswer(index) {
+  timer = SECONDS_PER_QUESTION;
 
-  if (answered) return;
+  timerElement.textContent = timer;
 
-  answered = true;
+  timerInterval = setInterval(() => {
 
-  const q =
-    questions[currentQuestion];
+    timer--;
 
-  const selected =
-    q.options[index];
+    timerElement.textContent =
+      timer;
 
+    if (timer <= 0) {
 
-  const buttons =
-    document.querySelectorAll(".option");
+      clearInterval(timerInterval);
 
-
-  if (
-    String(selected) ===
-    String(q.answer)
-  ) {
-
-    score++;
-
-    buttons[index]
-      .classList.add("correct");
-
-  } else {
-
-    buttons[index]
-      .classList.add("wrong");
-
-
-    q.options.forEach(
-      (option, i) => {
-
-        if (
-          String(option) ===
-          String(q.answer)
-        ) {
-
-          buttons[i]
-            .classList.add("correct");
-
-        }
-
-      }
-    );
-  }
-
-
-  buttons.forEach(
-    button => {
-      button.disabled = true;
+      autoNext();
     }
-  );
 
-
-  document.getElementById("nextBtn")
-    .disabled = false;
+  }, 1000);
 }
 
+// ==========================================
+// AUTOMATIC NEXT
+// ==========================================
 
-/* ================================
-   NEXT QUESTION
-================================ */
-
-function nextQuestion() {
-
-  if (!answered) return;
-
-  currentQuestion++;
-
+function autoNext() {
 
   if (
-    currentQuestion >=
-    questions.length
+    currentIndex <
+    quizQuestions.length - 1
   ) {
 
-    showResult();
-
-  } else {
+    currentIndex++;
 
     showQuestion();
 
+  } else {
+
+    finishQuiz();
   }
 }
 
+// ==========================================
+// SAVE & NEXT
+// ==========================================
 
-/* ================================
-   RESULT
-================================ */
+saveNextBtn.addEventListener(
+  "click",
+  () => {
 
-function showResult() {
+    if (
+      currentIndex <
+      quizQuestions.length - 1
+    ) {
 
-  document.getElementById("question-box")
-    .style.display = "none";
+      currentIndex++;
 
-  document.getElementById("nextBtn")
-    .style.display = "none";
+      showQuestion();
 
-  document.getElementById("quiz-header")
-    .style.display = "none";
+    } else {
 
-  document.getElementById("result")
-    .style.display = "block";
+      finishQuiz();
+    }
+  }
+);
 
+// ==========================================
+// SKIP
+// ==========================================
 
-  document.getElementById("score")
-    .textContent =
-    `Your Score: ${score} / ${questions.length}`;
+skipBtn.addEventListener(
+  "click",
+  () => {
+
+    if (
+      currentIndex <
+      quizQuestions.length - 1
+    ) {
+
+      // Leave answer as null
+      currentIndex++;
+
+      showQuestion();
+
+    } else {
+
+      finishQuiz();
+    }
+  }
+);
+
+// ==========================================
+// BACK
+// ==========================================
+
+backBtn.addEventListener(
+  "click",
+  () => {
+
+    if (currentIndex > 0) {
+
+      currentIndex--;
+
+      showQuestion();
+    }
+  }
+);
+
+// ==========================================
+// BUTTON STATUS
+// ==========================================
+
+function updateButtons() {
+
+  backBtn.disabled =
+    currentIndex === 0;
+
+  if (
+    currentIndex ===
+    quizQuestions.length - 1
+  ) {
+
+    saveNextBtn.textContent =
+      "Save & Finish";
+
+  } else {
+
+    saveNextBtn.textContent =
+      "Save & Next";
+  }
 }
 
+// ==========================================
+// PROGRESS BAR
+// ==========================================
 
-/* ================================
-   RESTART
-================================ */
+function updateProgress() {
 
-function restartQuiz() {
+  const percent =
+    ((currentIndex + 1) /
+      quizQuestions.length) * 100;
 
-  currentQuestion = 0;
-  score = 0;
-  answered = false;
-
-
-  document.getElementById("result")
-    .style.display = "none";
-
-  document.getElementById("quiz-header")
-    .style.display = "block";
-
-  document.getElementById("question-box")
-    .style.display = "block";
-
-  document.getElementById("nextBtn")
-    .style.display = "block";
-
-
-  loadQuestions();
+  progressBar.style.width =
+    percent + "%";
 }
 
+// ==========================================
+// FINISH QUIZ
+// ==========================================
 
-/* ================================
-   START QUIZ
-================================ */
+function finishQuiz() {
 
-loadQuestions();
+  clearInterval(timerInterval);
+
+  let score = 0;
+
+  quizQuestions.forEach(
+    (q, index) => {
+
+      const correct =
+        q.answer ??
+        q.correct ??
+        q.correctAnswer;
+
+      const selected =
+        selectedAnswers[index];
+
+      // Supports numeric correct answer
+      if (
+        typeof correct === "number" &&
+        selected === correct
+      ) {
+        score++;
+      }
+
+      // Supports correct answer text
+      else if (
+        typeof correct === "string" &&
+        selected !== null
+      ) {
+
+        const options =
+          q.options ||
+          q.answers ||
+          [];
+
+        if (
+          options[selected] ===
+          correct
+        ) {
+          score++;
+        }
+      }
+    }
+  );
+
+  document
+    .querySelector(".question-box")
+    .classList.add("hidden");
+
+  document
+    .querySelector(".navigation")
+    .classList.add("hidden");
+
+  document
+    .querySelector(".progress")
+    .classList.add("hidden");
+
+  document
+    .querySelector(".timer-box")
+    .classList.add("hidden");
+
+  resultBox.classList.remove("hidden");
+
+  scoreElement.textContent =
+    score;
+}
