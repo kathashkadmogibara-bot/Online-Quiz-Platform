@@ -1,1131 +1,488 @@
-// ==========================================
-// MCQ QUIZ SYSTEM
-// 15 RANDOM QUESTIONS
-// 1 MINUTE PER QUESTION
-// ==========================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-const QUESTIONS_PER_QUIZ = 15;
-const TIME_PER_QUESTION = 60;
+  <title>MCQ Quiz</title>
 
-let selectedSubject = "";
-let selectedClass = "";
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="test.css">
+</head>
 
-let quizQuestions = [];
-let currentQuestion = 0;
-let answers = [];
-let skipped = [];
+<body>
 
-let timerInterval = null;
-let timeLeft = TIME_PER_QUESTION;
+  <!-- =========================
+       SUBJECT SCREEN
+  ========================== -->
 
-let quizStartTime = 0;
-let totalTimeUsed = 0;
+  <section id="subjectScreen" class="screen active">
 
+    <div class="quiz-box">
 
-// ==========================================
-// SCREEN CONTROL
-// ==========================================
+      <h1>Which Subject MCQ You Want?</h1>
 
-function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(screen => {
-    screen.classList.remove("active");
-  });
+      <button
+        class="subject-btn"
+        onclick="selectSubject('general')">
+        GENERAL SCIENCE
+      </button>
 
-  const screen = document.getElementById(id);
+      <button
+        class="subject-btn"
+        onclick="selectSubject('math')">
+        MATHEMATICS
+      </button>
 
-  if (screen) {
-    screen.classList.add("active");
-  }
-}
+      <button
+        class="subject-btn"
+        onclick="selectSubject('social')">
+        SOCIAL SCIENCE
+      </button>
 
+      <button
+        class="subject-btn"
+        onclick="selectSubject('english')">
+        ENGLISH
+      </button>
 
-// ==========================================
-// SUBJECT SELECTION
-// ==========================================
+      <button
+        class="subject-btn"
+        onclick="selectSubject('all')">
+        ALL SUBJECTS
+      </button>
 
-function selectSubject(subject) {
+    </div>
 
-  selectedSubject = subject;
+  </section>
 
-  let name = subject;
 
-  if (subject === "general") {
-    name = "GENERAL SCIENCE";
-  }
+  <!-- =========================
+       CLASS SCREEN
+  ========================== -->
 
-  if (subject === "math") {
-    name = "MATHEMATICS";
-  }
+  <section id="classScreen" class="screen">
 
-  if (subject === "social") {
-    name = "SOCIAL SCIENCE";
-  }
+    <div class="quiz-box">
 
-  if (subject === "english") {
-    name = "ENGLISH";
-  }
+      <h1 id="classTitle">
+        Choose Class
+      </h1>
 
-  if (subject === "all") {
-    name = "ALL SUBJECTS";
-  }
+      <button
+        class="class-btn"
+        onclick="selectClass(9)">
+        CLASS → 9TH
+      </button>
 
-  const title = document.getElementById("classTitle");
+      <button
+        class="class-btn"
+        onclick="selectClass(10)">
+        CLASS → 10TH
+      </button>
 
-  if (title) {
-    title.textContent = "Choose Class - " + name;
-  }
+      <button
+        class="class-btn"
+        onclick="selectClass(11)">
+        CLASS → 11TH
+      </button>
 
-  showScreen("classScreen");
-}
+      <button
+        class="class-btn"
+        onclick="selectClass(12)">
+        CLASS → 12TH
+      </button>
 
+      <button
+        class="back-menu-btn"
+        onclick="goToSubjects()">
+        ← BACK
+      </button>
 
-// ==========================================
-// CLASS SELECTION
-// ==========================================
+    </div>
 
-function selectClass(classNumber) {
+  </section>
 
-  selectedClass = String(classNumber);
 
-  startQuiz();
-}
+  <!-- =========================
+       QUIZ SCREEN
+  ========================== -->
 
+  <section id="quizScreen" class="screen">
 
-// ==========================================
-// BACK TO SUBJECTS
-// ==========================================
+    <div class="quiz-layout">
 
-function goToSubjects() {
+      <!-- MAIN QUIZ -->
 
-  stopTimer();
+      <div class="quiz-main">
 
-  showScreen("subjectScreen");
-}
+        <div class="quiz-header">
 
+          <div>
 
-// ==========================================
-// GET QUESTION ARRAY
-// ==========================================
+            <span id="subjectName">
+              Subject
+            </span>
 
-function getArray(variableName) {
+            <span> | </span>
 
-  if (Array.isArray(variableName)) {
-    return variableName;
-  }
+            <span id="className">
+              Class
+            </span>
 
-  return [];
-}
+          </div>
 
+          <div>
 
-// ==========================================
-// GET QUESTION POOL
-// ==========================================
+            Question
 
-function getQuestionPool() {
+            <span id="questionNumber">
+              1
+            </span>
 
-  let pool = [];
+            /
 
-  // GENERAL SCIENCE
-  if (selectedSubject === "general") {
+            <span id="totalQuestions">
+              15
+            </span>
 
-    pool = getArray(
-      typeof scienceQuestions !== "undefined"
-        ? scienceQuestions
-        : []
-    );
-  }
+          </div>
 
-  // MATHEMATICS
-  else if (selectedSubject === "math") {
+        </div>
 
-    pool = getArray(
-      typeof mathQuestions !== "undefined"
-        ? mathQuestions
-        : []
-    );
-  }
 
-  // SOCIAL SCIENCE
-  else if (selectedSubject === "social") {
+        <!-- TIMER -->
 
-    pool = getArray(
-      typeof socialQuestions !== "undefined"
-        ? socialQuestions
-        : []
-    );
-  }
+        <div class="timer-box">
 
-  // ENGLISH
-  else if (selectedSubject === "english") {
+          <div class="timer-label">
+            Time Left
+          </div>
 
-    pool = getArray(
-      typeof englishQuestions !== "undefined"
-        ? englishQuestions
-        : []
-    );
-  }
+          <div id="timer">
+            01:00
+          </div>
 
-  // ALL SUBJECTS
-  else if (selectedSubject === "all") {
+        </div>
 
-    if (typeof mathQuestions !== "undefined") {
-      pool = pool.concat(getArray(mathQuestions));
-    }
 
-    if (typeof scienceQuestions !== "undefined") {
-      pool = pool.concat(getArray(scienceQuestions));
-    }
+        <!-- PROGRESS -->
 
-    if (typeof socialQuestions !== "undefined") {
-      pool = pool.concat(getArray(socialQuestions));
-    }
+        <div class="progress-container">
 
-    if (typeof englishQuestions !== "undefined") {
-      pool = pool.concat(getArray(englishQuestions));
-    }
-  }
+          <div
+            id="progressBar"
+            class="progress-bar">
+          </div>
 
+        </div>
 
-  // ========================================
-  // CLASS FILTER
-  // ========================================
 
-  pool = pool.filter(question => {
+        <!-- QUESTION -->
 
-    if (!question) {
-      return false;
-    }
+        <div class="question-box">
 
-    const qClass =
-      question.class ??
-      question.className ??
-      question.grade;
+          <h2 id="questionText">
+            Loading question...
+          </h2>
 
-    return String(qClass) === String(selectedClass);
-  });
+        </div>
 
 
-  return pool;
-}
+        <!-- OPTIONS -->
 
+        <div
+          id="optionsContainer"
+          class="options-container">
+        </div>
 
-// ==========================================
-// SHUFFLE
-// ==========================================
 
-function shuffle(array) {
+        <!-- BUTTONS -->
 
-  const arr = [...array];
+        <div class="quiz-buttons">
 
-  for (let i = arr.length - 1; i > 0; i--) {
+          <button
+            id="backButton"
+            onclick="previousQuestion()">
+            ← Back
+          </button>
 
-    const j = Math.floor(
-      Math.random() * (i + 1)
-    );
+          <button
+            id="skipButton"
+            onclick="skipQuestion()">
+            Skip
+          </button>
 
-    [arr[i], arr[j]] =
-      [arr[j], arr[i]];
-  }
+          <button
+            id="saveNextButton"
+            onclick="saveAndNext()">
+            Save & Next →
+          </button>
 
-  return arr;
-}
+          <button
+            id="nextButton"
+            onclick="nextQuestion()">
+            Next →
+          </button>
 
+        </div>
 
-// ==========================================
-// START QUIZ
-// ==========================================
+      </div>
 
-function startQuiz() {
 
-  const pool = getQuestionPool();
+      <!-- =========================
+           ANALYTICS SIDEBAR
+      ========================== -->
 
-  if (!pool.length) {
+      <aside class="quiz-sidebar">
 
-    alert(
-      "No questions found for " +
-      selectedSubject +
-      " - Class " +
-      selectedClass
-    );
+        <h2>
+          Quiz Analytics
+        </h2>
 
-    return;
-  }
 
+        <div class="side-card">
 
-  quizQuestions = shuffle(pool).slice(
-    0,
-    Math.min(
-      QUESTIONS_PER_QUIZ,
-      pool.length
-    )
-  );
+          <span>
+            Questions
+          </span>
 
+          <strong id="sideQuestion">
+            1 / 15
+          </strong>
 
-  currentQuestion = 0;
+        </div>
 
-  answers =
-    new Array(quizQuestions.length)
-      .fill(null);
 
-  skipped =
-    new Array(quizQuestions.length)
-      .fill(false);
+        <div class="side-card">
 
+          <span>
+            Answered
+          </span>
 
-  quizStartTime = Date.now();
+          <strong id="answeredCount">
+            0
+          </strong>
 
-  totalTimeUsed = 0;
+        </div>
 
-  showScreen("quizScreen");
 
+        <div class="side-card">
 
-  updateQuizHeader();
+          <span>
+            Correct
+          </span>
 
-  updateAnalytics();
+          <strong id="correctCount">
+            0
+          </strong>
 
-  loadQuestion();
+        </div>
 
-  startTimer();
-}
 
+        <div class="side-card">
 
-// ==========================================
-// QUESTION TEXT
-// ==========================================
+          <span>
+            Wrong
+          </span>
 
-function getQuestionText(question) {
+          <strong id="wrongCount">
+            0
+          </strong>
 
-  return (
-    question.question ??
-    question.text ??
-    question.q ??
-    "Question not found"
-  );
-}
+        </div>
 
 
-// ==========================================
-// OPTIONS
-// ==========================================
+        <div class="side-card">
 
-function getOptions(question) {
+          <span>
+            Skipped
+          </span>
 
-  if (Array.isArray(question.options)) {
-    return question.options;
-  }
+          <strong id="skippedCount">
+            0
+          </strong>
 
-  if (Array.isArray(question.answers)) {
-    return question.answers;
-  }
+        </div>
 
-  return [
-    question.optionA,
-    question.optionB,
-    question.optionC,
-    question.optionD
-  ].filter(x => x !== undefined);
-}
 
+        <div class="side-card">
 
-// ==========================================
-// CORRECT ANSWER
-// ==========================================
+          <span>
+            Time Used
+          </span>
 
-function getCorrectAnswer(question) {
+          <strong id="timeUsed">
+            0:00
+          </strong>
 
-  return (
-    question.answer ??
-    question.correctAnswer ??
-    question.correct ??
-    question.correctOption
-  );
-}
+        </div>
 
+      </aside>
 
-// ==========================================
-// LOAD QUESTION
-// ==========================================
+    </div>
 
-function loadQuestion() {
+  </section>
 
-  const question =
-    quizQuestions[currentQuestion];
 
-  if (!question) {
-    finishQuiz();
-    return;
-  }
+  <!-- =========================
+       RESULT SCREEN
+  ========================== -->
 
+  <section id="resultScreen" class="screen">
 
-  const questionText =
-    document.getElementById("questionText");
+    <div class="result-box">
 
-  const optionsContainer =
-    document.getElementById("optionsContainer");
+      <h1>
+        Quiz Complete 🎉
+      </h1>
 
 
-  questionText.textContent =
-    getQuestionText(question);
+      <div
+        class="result-circle"
+        id="resultCircle">
 
+        <span id="resultPercent">
+          0%
+        </span>
 
-  optionsContainer.innerHTML = "";
+      </div>
 
 
-  const options =
-    getOptions(question);
+      <h2 id="resultMessage">
+        Result
+      </h2>
 
 
-  const savedAnswer =
-    answers[currentQuestion];
+      <div class="result-info">
 
+        <div>
 
-  options.forEach((option, index) => {
+          <span>
+            Marks
+          </span>
 
-    const button =
-      document.createElement("button");
+          <strong id="finalMarks">
+            0 / 15
+          </strong>
 
-    button.className =
-      "option-btn";
+        </div>
 
-    button.textContent =
-      option;
 
+        <div>
 
-    if (savedAnswer === index) {
-      button.classList.add("selected");
-    }
+          <span>
+            Correct
+          </span>
 
+          <strong id="finalCorrect">
+            0
+          </strong>
 
-    button.onclick = function () {
+        </div>
 
-      selectAnswer(index);
-    };
 
+        <div>
 
-    optionsContainer.appendChild(button);
-  });
+          <span>
+            Wrong
+          </span>
 
+          <strong id="finalWrong">
+            0
+          </strong>
 
-  updateQuizHeader();
+        </div>
 
-  updateAnalytics();
 
-  resetQuestionTimer();
-}
+        <div>
 
+          <span>
+            Skipped
+          </span>
 
-// ==========================================
-// SELECT ANSWER
-// ==========================================
+          <strong id="finalSkipped">
+            0
+          </strong>
 
-function selectAnswer(index) {
+        </div>
 
-  answers[currentQuestion] = index;
 
-  skipped[currentQuestion] = false;
+        <div>
 
-  const buttons =
-    document.querySelectorAll(
-      "#optionsContainer .option-btn"
-    );
+          <span>
+            Total Time
+          </span>
 
+          <strong id="finalTime">
+            0:00
+          </strong>
 
-  buttons.forEach((button, i) => {
+        </div>
 
-    button.classList.toggle(
-      "selected",
-      i === index
-    );
-  });
 
+        <div>
 
-  updateAnalytics();
-}
+          <span>
+            Questions / Minute
+          </span>
 
+          <strong id="questionsPerMinute">
+            0
+          </strong>
 
-// ==========================================
-// SKIP QUESTION
-// ==========================================
+        </div>
 
-function skipQuestion() {
+      </div>
 
-  answers[currentQuestion] = null;
 
-  skipped[currentQuestion] = true;
+      <!-- RESULT LEVEL -->
 
-  moveNext();
-}
+      <div
+        id="resultLevel"
+        class="result-level">
+        🔴
+      </div>
 
 
-// ==========================================
-// SAVE AND NEXT
-// ==========================================
+      <button
+        onclick="restartQuiz()"
+        class="restart-btn">
+        Try Again
+      </button>
 
-function saveAndNext() {
 
-  if (answers[currentQuestion] === null) {
+      <button
+        onclick="goToSubjects()"
+        class="home-btn">
+        Choose Another Subject
+      </button>
 
-    skipped[currentQuestion] = true;
-  }
+    </div>
 
-  else {
+  </section>
 
-    skipped[currentQuestion] = false;
-  }
 
-  moveNext();
-}
+  <!-- =========================
+       QUESTION FILES
+  ========================== -->
 
+  <script src="questions.js"></script>
 
-// ==========================================
-// NEXT
-// ==========================================
+  <script src="questions-math.js"></script>
 
-function nextQuestion() {
+  <script src="questions-science.js"></script>
 
-  moveNext();
-}
+  <script src="questions-social.js"></script>
 
+  <script src="questions-english.js"></script>
 
-// ==========================================
-// MOVE NEXT
-// ==========================================
 
-function moveNext() {
+  <!-- =========================
+       MAIN QUIZ JS
+  ========================== -->
 
-  if (
-    currentQuestion <
-    quizQuestions.length - 1
-  ) {
+  <script src="test.js"></script>
 
-    currentQuestion++;
-
-    loadQuestion();
-
-  }
-
-  else {
-
-    finishQuiz();
-  }
-}
-
-
-// ==========================================
-// PREVIOUS QUESTION
-// ==========================================
-
-function previousQuestion() {
-
-  if (currentQuestion > 0) {
-
-    currentQuestion--;
-
-    loadQuestion();
-  }
-}
-
-
-// ==========================================
-// TIMER
-// ==========================================
-
-function startTimer() {
-
-  stopTimer();
-
-  timerInterval =
-    setInterval(() => {
-
-      timeLeft--;
-
-      updateTimerDisplay();
-
-      if (timeLeft <= 0) {
-
-        timeLeft = 0;
-
-        updateTimerDisplay();
-
-        autoNextQuestion();
-      }
-
-    }, 1000);
-}
-
-
-// ==========================================
-// RESET QUESTION TIMER
-// ==========================================
-
-function resetQuestionTimer() {
-
-  timeLeft = TIME_PER_QUESTION;
-
-  updateTimerDisplay();
-}
-
-
-// ==========================================
-// AUTO NEXT AFTER 1 MINUTE
-// ==========================================
-
-function autoNextQuestion() {
-
-  if (answers[currentQuestion] === null) {
-
-    skipped[currentQuestion] = true;
-  }
-
-
-  if (
-    currentQuestion <
-    quizQuestions.length - 1
-  ) {
-
-    currentQuestion++;
-
-    loadQuestion();
-
-  }
-
-  else {
-
-    finishQuiz();
-  }
-}
-
-
-// ==========================================
-// STOP TIMER
-// ==========================================
-
-function stopTimer() {
-
-  if (timerInterval !== null) {
-
-    clearInterval(timerInterval);
-
-    timerInterval = null;
-  }
-}
-
-
-// ==========================================
-// TIMER DISPLAY
-// ==========================================
-
-function updateTimerDisplay() {
-
-  const timer =
-    document.getElementById("timer");
-
-  if (!timer) {
-    return;
-  }
-
-
-  const minutes =
-    Math.floor(timeLeft / 60);
-
-  const seconds =
-    timeLeft % 60;
-
-
-  timer.textContent =
-    String(minutes).padStart(2, "0") +
-    ":" +
-    String(seconds).padStart(2, "0");
-}
-
-
-// ==========================================
-// HEADER
-// ==========================================
-
-function updateQuizHeader() {
-
-  const subjectName =
-    document.getElementById("subjectName");
-
-  const className =
-    document.getElementById("className");
-
-  const questionNumber =
-    document.getElementById("questionNumber");
-
-  const totalQuestions =
-    document.getElementById("totalQuestions");
-
-
-  let subjectText =
-    selectedSubject;
-
-
-  if (selectedSubject === "general") {
-    subjectText = "GENERAL SCIENCE";
-  }
-
-  else if (selectedSubject === "math") {
-    subjectText = "MATHEMATICS";
-  }
-
-  else if (selectedSubject === "social") {
-    subjectText = "SOCIAL SCIENCE";
-  }
-
-  else if (selectedSubject === "english") {
-    subjectText = "ENGLISH";
-  }
-
-  else if (selectedSubject === "all") {
-    subjectText = "ALL SUBJECTS";
-  }
-
-
-  subjectName.textContent =
-    subjectText;
-
-  className.textContent =
-    "Class " + selectedClass;
-
-  questionNumber.textContent =
-    currentQuestion + 1;
-
-  totalQuestions.textContent =
-    quizQuestions.length;
-}
-
-
-// ==========================================
-// ANALYTICS
-// ==========================================
-
-function updateAnalytics() {
-
-  let answered = 0;
-  let correct = 0;
-  let wrong = 0;
-  let skippedCount = 0;
-
-
-  quizQuestions.forEach(
-    (question, index) => {
-
-      const answer =
-        answers[index];
-
-
-      if (answer !== null) {
-
-        answered++;
-
-        const options =
-          getOptions(question);
-
-        const correctAnswer =
-          getCorrectAnswer(question);
-
-
-        let correctIndex =
-          getCorrectIndex(
-            question,
-            options,
-            correctAnswer
-          );
-
-
-        if (answer === correctIndex) {
-          correct++;
-        }
-
-        else {
-          wrong++;
-        }
-
-      }
-
-      else if (skipped[index]) {
-
-        skippedCount++;
-      }
-    }
-  );
-
-
-  document.getElementById(
-    "sideQuestion"
-  ).textContent =
-    (currentQuestion + 1) +
-    " / " +
-    quizQuestions.length;
-
-
-  document.getElementById(
-    "answeredCount"
-  ).textContent =
-    answered;
-
-
-  document.getElementById(
-    "correctCount"
-  ).textContent =
-    correct;
-
-
-  document.getElementById(
-    "wrongCount"
-  ).textContent =
-    wrong;
-
-
-  document.getElementById(
-    "skippedCount"
-  ).textContent =
-    skippedCount;
-
-
-  const elapsed =
-    Math.floor(
-      (Date.now() - quizStartTime) / 1000
-    );
-
-
-  document.getElementById(
-    "timeUsed"
-  ).textContent =
-    formatTime(elapsed);
-}
-
-
-// ==========================================
-// FIND CORRECT ANSWER INDEX
-// ==========================================
-
-function getCorrectIndex(
-  question,
-  options,
-  correctAnswer
-) {
-
-  if (
-    typeof correctAnswer === "number"
-  ) {
-
-    if (
-      correctAnswer >= 0 &&
-      correctAnswer < options.length
-    ) {
-
-      return correctAnswer;
-    }
-
-    if (
-      correctAnswer >= 1 &&
-      correctAnswer <= options.length
-    ) {
-
-      return correctAnswer - 1;
-    }
-  }
-
-
-  if (
-    typeof correctAnswer === "string"
-  ) {
-
-    const answerText =
-      correctAnswer.trim();
-
-
-    // A / B / C / D
-    const letter =
-      answerText.toUpperCase();
-
-
-    if (
-      ["A", "B", "C", "D"].includes(letter)
-    ) {
-
-      return (
-        letter.charCodeAt(0) -
-        "A".charCodeAt(0)
-      );
-    }
-
-
-    // Exact option text
-    const index =
-      options.findIndex(
-        option =>
-          String(option).trim() ===
-          answerText
-      );
-
-
-    if (index !== -1) {
-      return index;
-    }
-  }
-
-
-  return -1;
-}
-
-
-// ==========================================
-// FORMAT TIME
-// ==========================================
-
-function formatTime(seconds) {
-
-  const minutes =
-    Math.floor(seconds / 60);
-
-  const secs =
-    seconds % 60;
-
-
-  return (
-    minutes +
-    ":" +
-    String(secs).padStart(2, "0")
-  );
-}
-
-
-// ==========================================
-// FINISH QUIZ
-// ==========================================
-
-function finishQuiz() {
-
-  stopTimer();
-
-
-  totalTimeUsed =
-    Math.floor(
-      (Date.now() - quizStartTime) / 1000
-    );
-
-
-  let correct = 0;
-  let wrong = 0;
-  let skippedCount = 0;
-
-
-  quizQuestions.forEach(
-    (question, index) => {
-
-      if (answers[index] === null) {
-
-        skippedCount++;
-
-        return;
-      }
-
-
-      const options =
-        getOptions(question);
-
-      const correctAnswer =
-        getCorrectAnswer(question);
-
-
-      const correctIndex =
-        getCorrectIndex(
-          question,
-          options,
-          correctAnswer
-        );
-
-
-      if (
-        answers[index] === correctIndex
-      ) {
-
-        correct++;
-      }
-
-      else {
-
-        wrong++;
-      }
-    }
-  );
-
-
-  const total =
-    quizQuestions.length;
-
-
-  const percentage =
-    total > 0
-      ? Math.round(
-          (correct / total) * 100
-        )
-      : 0;
-
-
-  const qpm =
-    totalTimeUsed > 0
-      ? (
-          total /
-          (totalTimeUsed / 60)
-        ).toFixed(2)
-      : total;
-
-
-  document.getElementById(
-    "finalMarks"
-  ).textContent =
-    correct + " / " + total;
-
-
-  document.getElementById(
-    "finalCorrect"
-  ).textContent =
-    correct;
-
-
-  document.getElementById(
-    "finalWrong"
-  ).textContent =
-    wrong;
-
-
-  document.getElementById(
-    "finalSkipped"
-  ).textContent =
-    skippedCount;
-
-
-  document.getElementById(
-    "finalTime"
-  ).textContent =
-    formatTime(totalTimeUsed);
-
-
-  document.getElementById(
-    "questionsPerMinute"
-  ).textContent =
-    qpm;
-
-
-  document.getElementById(
-    "resultPercent"
-  ).textContent =
-    percentage + "%";
-
-
-  setResultLevel(correct);
-
-
-  let message =
-    "Keep practicing!";
-
-
-  if (correct >= 11) {
-    message = "Excellent! 🔥";
-  }
-
-  else if (correct >= 7) {
-    message = "Very Good! 👍";
-  }
-
-  else if (correct >= 4) {
-    message = "Good Try! 💪";
-  }
-
-
-  document.getElementById(
-    "resultMessage"
-  ).textContent =
-    message;
-
-
-  showScreen("resultScreen");
-}
-
-
-// ==========================================
-// RESULT COLOR LEVEL
-// ==========================================
-
-function setResultLevel(correct) {
-
-  const circle =
-    document.getElementById(
-      "resultCircle"
-    );
-
-  const level =
-    document.getElementById(
-      "resultLevel"
-    );
-
-
-  // Remove old classes
-  circle.classList.remove(
-    "red",
-    "orange",
-    "yellow",
-    "green"
-  );
-
-
-  if (correct >= 11) {
-
-    circle.classList.add("green");
-
-    level.textContent =
-      "🟢 11–15 Correct";
-  }
-
-  else if (correct >= 7) {
-
-    circle.classList.add("yellow");
-
-    level.textContent =
-      "🟡 7–10 Correct";
-  }
-
-  else if (correct >= 4) {
-
-    circle.classList.add("orange");
-
-    level.textContent =
-      "🟠 4–6 Correct";
-  }
-
-  else {
-
-    circle.classList.add("red");
-
-    level.textContent =
-      "🔴 0–3 Correct";
-  }
-}
-
-
-// ==========================================
-// RESTART QUIZ
-// ==========================================
-
-function restartQuiz() {
-
-  startQuiz();
-}
-
-
-// ==========================================
-// PAGE START
-// ==========================================
-
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-
-    showScreen("subjectScreen");
-  }
-);
+</body>
+</html>
