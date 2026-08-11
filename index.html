@@ -4,68 +4,60 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MCQ Quiz</title>
-  <link rel="stylesheet" href="test.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <div class="quiz-container">
+  <div class="container">
 
-    <div class="quiz-header">
-      <h1>MCQ Quiz</h1>
-      <div class="question-count">
-        Question <span id="currentQuestion">1</span> / <span id="totalQuestions">15</span>
-      </div>
-    </div>
+    <h1>MCQ QUIZ</h1>
+    <p class="subtitle">Choose a subject to start</p>
 
-    <div class="timer-box">
-      ⏱️ Time Left:
-      <strong><span id="timer">10</span>s</strong>
-    </div>
+    <section id="subjectMenu" class="menu">
+      <h2>Which Subject MCQ You Want?</h2>
 
-    <div class="progress">
-      <div id="progressBar"></div>
-    </div>
-
-    <div class="question-box">
-      <h2 id="question">Loading question...</h2>
-
-      <div id="options"></div>
-    </div>
-
-    <div class="navigation">
-
-      <button id="backBtn" class="nav-btn">
-        ◀ Back
+      <button class="subject-btn" data-subject="science">
+        GENERAL SCIENCE
       </button>
 
-      <button id="skipBtn" class="nav-btn">
-        Skip
+      <button class="subject-btn" data-subject="math">
+        MATHEMATICS
       </button>
 
-      <button id="saveNextBtn" class="save-btn">
-        Save & Next
+      <button class="subject-btn" data-subject="social">
+        SOCIAL SCIENCE
       </button>
 
-    </div>
-
-    <div id="resultBox" class="result-box hidden">
-      <h2>Quiz Complete 🎉</h2>
-
-      <p>
-        Your Score:
-        <strong><span id="score">0</span></strong>
-        /
-        <strong>15</strong>
-      </p>
-
-      <button onclick="location.reload()" class="restart-btn">
-        Restart Quiz
+      <button class="subject-btn" data-subject="english">
+        ENGLISH
       </button>
-    </div>
+
+      <button class="subject-btn" data-subject="all">
+        ALL SUBJECTS
+      </button>
+    </section>
+
+    <section id="classMenu" class="menu hidden">
+      <h2>Choose Your Class</h2>
+
+      <button class="class-btn" data-class="9">CLASS → 9TH</button>
+      <button class="class-btn" data-class="10">CLASS → 10TH</button>
+      <button class="class-btn" data-class="11">CLASS → 11TH</button>
+      <button class="class-btn" data-class="12">CLASS → 12TH</button>
+
+      <button id="backSubject" class="back-btn">
+        ← Back
+      </button>
+    </section>
 
   </div>
 
+  <script src="questions.js"></script>
+  <script src="questions-math.js"></script>
+  <script src="questions-science.js"></script>
+  <script src="questions-social.js"></script>
+  <script src="questions-english.js"></script>
   <script src="test.js"></script>
 
 </body>
