@@ -1,376 +1,1131 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+// ==========================================
+// MCQ QUIZ SYSTEM
+// 15 RANDOM QUESTIONS
+// 1 MINUTE PER QUESTION
+// ==========================================
 
-  <title>MCQ Quiz</title>
+const QUESTIONS_PER_QUIZ = 15;
+const TIME_PER_QUESTION = 60;
 
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="test.css">
-</head>
+let selectedSubject = "";
+let selectedClass = "";
 
-<body>
+let quizQuestions = [];
+let currentQuestion = 0;
+let answers = [];
+let skipped = [];
 
-  <!-- =========================
-       SUBJECT MENU
-  ========================== -->
-  <section id="subjectScreen" class="screen active">
+let timerInterval = null;
+let timeLeft = TIME_PER_QUESTION;
 
-    <div class="quiz-box">
+let quizStartTime = 0;
+let totalTimeUsed = 0;
 
-      <h1>Which Subject MCQ You Want?</h1>
 
-      <button class="subject-btn" onclick="selectSubject('general')">
-        GENERAL SCIENCE
-      </button>
+// ==========================================
+// SCREEN CONTROL
+// ==========================================
 
-      <button class="subject-btn" onclick="selectSubject('math')">
-        MATHEMATICS
-      </button>
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(screen => {
+    screen.classList.remove("active");
+  });
 
-      <button class="subject-btn" onclick="selectSubject('social')">
-        SOCIAL SCIENCE
-      </button>
+  const screen = document.getElementById(id);
 
-      <button class="subject-btn" onclick="selectSubject('english')">
-        ENGLISH
-      </button>
+  if (screen) {
+    screen.classList.add("active");
+  }
+}
 
-      <button class="subject-btn" onclick="selectSubject('all')">
-        ALL SUBJECTS
-      </button>
 
-    </div>
+// ==========================================
+// SUBJECT SELECTION
+// ==========================================
 
-  </section>
+function selectSubject(subject) {
 
+  selectedSubject = subject;
 
-  <!-- =========================
-       CLASS MENU
-  ========================== -->
-  <section id="classScreen" class="screen">
+  let name = subject;
 
-    <div class="quiz-box">
+  if (subject === "general") {
+    name = "GENERAL SCIENCE";
+  }
 
-      <h1 id="classTitle">Choose Class</h1>
+  if (subject === "math") {
+    name = "MATHEMATICS";
+  }
 
-      <button class="class-btn" onclick="selectClass(9)">
-        CLASS → 9TH
-      </button>
+  if (subject === "social") {
+    name = "SOCIAL SCIENCE";
+  }
 
-      <button class="class-btn" onclick="selectClass(10)">
-        CLASS → 10TH
-      </button>
+  if (subject === "english") {
+    name = "ENGLISH";
+  }
 
-      <button class="class-btn" onclick="selectClass(11)">
-        CLASS → 11TH
-      </button>
+  if (subject === "all") {
+    name = "ALL SUBJECTS";
+  }
 
-      <button class="class-btn" onclick="selectClass(12)">
-        CLASS → 12TH
-      </button>
+  const title = document.getElementById("classTitle");
 
-      <button class="back-menu-btn" onclick="goToSubjects()">
-        ← BACK
-      </button>
+  if (title) {
+    title.textContent = "Choose Class - " + name;
+  }
 
-    </div>
+  showScreen("classScreen");
+}
 
-  </section>
 
+// ==========================================
+// CLASS SELECTION
+// ==========================================
 
-  <!-- =========================
-       QUIZ SCREEN
-  ========================== -->
-  <section id="quizScreen" class="screen">
+function selectClass(classNumber) {
 
-    <div class="quiz-layout">
+  selectedClass = String(classNumber);
 
-      <!-- MAIN QUIZ -->
-      <div class="quiz-main">
+  startQuiz();
+}
 
-        <div class="quiz-header">
 
-          <div>
-            <span id="subjectName">Subject</span>
-            <span> | </span>
-            <span id="className">Class</span>
-          </div>
+// ==========================================
+// BACK TO SUBJECTS
+// ==========================================
 
-          <div>
-            Question
-            <span id="questionNumber">1</span>
-            /
-            <span id="totalQuestions">15</span>
-          </div>
+function goToSubjects() {
 
-        </div>
+  stopTimer();
 
+  showScreen("subjectScreen");
+}
 
-        <!-- TIMER -->
-        <div class="timer-box">
 
-          <div class="timer-label">
-            Time Left
-          </div>
+// ==========================================
+// GET QUESTION ARRAY
+// ==========================================
 
-          <div id="timer">
-            01:00
-          </div>
+function getArray(variableName) {
 
-        </div>
+  if (Array.isArray(variableName)) {
+    return variableName;
+  }
 
+  return [];
+}
 
-        <!-- PROGRESS -->
-        <div class="progress-container">
 
-          <div
-            id="progressBar"
-            class="progress-bar">
-          </div>
+// ==========================================
+// GET QUESTION POOL
+// ==========================================
 
-        </div>
+function getQuestionPool() {
 
+  let pool = [];
 
-        <!-- QUESTION -->
-        <div class="question-box">
+  // GENERAL SCIENCE
+  if (selectedSubject === "general") {
 
-          <h2 id="questionText">
-            Loading question...
-          </h2>
+    pool = getArray(
+      typeof scienceQuestions !== "undefined"
+        ? scienceQuestions
+        : []
+    );
+  }
 
-        </div>
+  // MATHEMATICS
+  else if (selectedSubject === "math") {
 
+    pool = getArray(
+      typeof mathQuestions !== "undefined"
+        ? mathQuestions
+        : []
+    );
+  }
 
-        <!-- OPTIONS -->
-        <div id="optionsContainer" class="options-container">
+  // SOCIAL SCIENCE
+  else if (selectedSubject === "social") {
 
-        </div>
+    pool = getArray(
+      typeof socialQuestions !== "undefined"
+        ? socialQuestions
+        : []
+    );
+  }
 
+  // ENGLISH
+  else if (selectedSubject === "english") {
 
-        <!-- BUTTONS -->
-        <div class="quiz-buttons">
+    pool = getArray(
+      typeof englishQuestions !== "undefined"
+        ? englishQuestions
+        : []
+    );
+  }
 
-          <button
-            id="backButton"
-            onclick="previousQuestion()">
-            ← Back
-          </button>
+  // ALL SUBJECTS
+  else if (selectedSubject === "all") {
 
-          <button
-            id="skipButton"
-            onclick="skipQuestion()">
-            Skip
-          </button>
+    if (typeof mathQuestions !== "undefined") {
+      pool = pool.concat(getArray(mathQuestions));
+    }
 
-          <button
-            id="saveNextButton"
-            onclick="saveAndNext()">
-            Save & Next →
-          </button>
+    if (typeof scienceQuestions !== "undefined") {
+      pool = pool.concat(getArray(scienceQuestions));
+    }
 
-          <button
-            id="nextButton"
-            onclick="nextQuestion()">
-            Next →
-          </button>
+    if (typeof socialQuestions !== "undefined") {
+      pool = pool.concat(getArray(socialQuestions));
+    }
 
-        </div>
+    if (typeof englishQuestions !== "undefined") {
+      pool = pool.concat(getArray(englishQuestions));
+    }
+  }
 
-      </div>
 
+  // ========================================
+  // CLASS FILTER
+  // ========================================
 
-      <!-- =========================
-           SIDE PANEL
-      ========================== -->
-      <aside class="quiz-sidebar">
+  pool = pool.filter(question => {
 
-        <h2>Quiz Analytics</h2>
+    if (!question) {
+      return false;
+    }
 
-        <div class="side-card">
+    const qClass =
+      question.class ??
+      question.className ??
+      question.grade;
 
-          <span>Questions</span>
+    return String(qClass) === String(selectedClass);
+  });
 
-          <strong id="sideQuestion">
-            1 / 15
-          </strong>
 
-        </div>
+  return pool;
+}
 
 
-        <div class="side-card">
+// ==========================================
+// SHUFFLE
+// ==========================================
 
-          <span>Answered</span>
+function shuffle(array) {
 
-          <strong id="answeredCount">
-            0
-          </strong>
+  const arr = [...array];
 
-        </div>
+  for (let i = arr.length - 1; i > 0; i--) {
 
+    const j = Math.floor(
+      Math.random() * (i + 1)
+    );
 
-        <div class="side-card">
+    [arr[i], arr[j]] =
+      [arr[j], arr[i]];
+  }
 
-          <span>Correct</span>
+  return arr;
+}
 
-          <strong id="correctCount">
-            0
-          </strong>
 
-        </div>
+// ==========================================
+// START QUIZ
+// ==========================================
 
+function startQuiz() {
 
-        <div class="side-card">
+  const pool = getQuestionPool();
 
-          <span>Wrong</span>
+  if (!pool.length) {
 
-          <strong id="wrongCount">
-            0
-          </strong>
+    alert(
+      "No questions found for " +
+      selectedSubject +
+      " - Class " +
+      selectedClass
+    );
 
-        </div>
+    return;
+  }
 
 
-        <div class="side-card">
+  quizQuestions = shuffle(pool).slice(
+    0,
+    Math.min(
+      QUESTIONS_PER_QUIZ,
+      pool.length
+    )
+  );
 
-          <span>Skipped</span>
 
-          <strong id="skippedCount">
-            0
-          </strong>
+  currentQuestion = 0;
 
-        </div>
+  answers =
+    new Array(quizQuestions.length)
+      .fill(null);
 
+  skipped =
+    new Array(quizQuestions.length)
+      .fill(false);
 
-        <div class="side-card">
 
-          <span>Time Used</span>
+  quizStartTime = Date.now();
 
-          <strong id="timeUsed">
-            0:00
-          </strong>
+  totalTimeUsed = 0;
 
-        </div>
+  showScreen("quizScreen");
 
-      </aside>
 
-    </div>
+  updateQuizHeader();
 
-  </section>
+  updateAnalytics();
 
+  loadQuestion();
 
-  <!-- =========================
-       RESULT SCREEN
-  ========================== -->
-  <section id="resultScreen" class="screen">
+  startTimer();
+}
 
-    <div class="result-box">
 
-      <h1>Quiz Complete 🎉</h1>
+// ==========================================
+// QUESTION TEXT
+// ==========================================
 
-      <div class="result-circle" id="resultCircle">
+function getQuestionText(question) {
 
-        <span id="resultPercent">
-          0%
-        </span>
+  return (
+    question.question ??
+    question.text ??
+    question.q ??
+    "Question not found"
+  );
+}
 
-      </div>
 
+// ==========================================
+// OPTIONS
+// ==========================================
 
-      <h2 id="resultMessage">
-        Result
-      </h2>
+function getOptions(question) {
 
+  if (Array.isArray(question.options)) {
+    return question.options;
+  }
 
-      <div class="result-info">
+  if (Array.isArray(question.answers)) {
+    return question.answers;
+  }
 
-        <div>
-          <span>Marks</span>
-          <strong id="finalMarks">
-            0 / 15
-          </strong>
-        </div>
+  return [
+    question.optionA,
+    question.optionB,
+    question.optionC,
+    question.optionD
+  ].filter(x => x !== undefined);
+}
 
-        <div>
-          <span>Correct</span>
-          <strong id="finalCorrect">
-            0
-          </strong>
-        </div>
 
-        <div>
-          <span>Wrong</span>
-          <strong id="finalWrong">
-            0
-          </strong>
-        </div>
+// ==========================================
+// CORRECT ANSWER
+// ==========================================
 
-        <div>
-          <span>Skipped</span>
-          <strong id="finalSkipped">
-            0
-          </strong>
-        </div>
+function getCorrectAnswer(question) {
 
-        <div>
-          <span>Total Time</span>
-          <strong id="finalTime">
-            0:00
-          </strong>
-        </div>
+  return (
+    question.answer ??
+    question.correctAnswer ??
+    question.correct ??
+    question.correctOption
+  );
+}
 
-        <div>
-          <span>Questions / Minute</span>
-          <strong id="questionsPerMinute">
-            0
-          </strong>
-        </div>
 
-      </div>
+// ==========================================
+// LOAD QUESTION
+// ==========================================
 
+function loadQuestion() {
 
-      <!-- RESULT LEVEL -->
-      <div id="resultLevel" class="result-level">
-        🔴
-      </div>
+  const question =
+    quizQuestions[currentQuestion];
 
+  if (!question) {
+    finishQuiz();
+    return;
+  }
 
-      <button onclick="restartQuiz()" class="restart-btn">
-        Try Again
-      </button>
 
-      <button onclick="goToSubjects()" class="home-btn">
-        Choose Another Subject
-      </button>
+  const questionText =
+    document.getElementById("questionText");
 
-    </div>
+  const optionsContainer =
+    document.getElementById("optionsContainer");
 
-  </section>
 
+  questionText.textContent =
+    getQuestionText(question);
 
-  <!-- =========================
-       QUESTION DATA FILES
-  ========================== -->
 
-  <!-- Main question file -->
-  <script src="questions.js"></script>
+  optionsContainer.innerHTML = "";
 
-  <!-- Mathematics -->
-  <script src="questions-math.js"></script>
 
-  <!-- Science -->
-  <script src="questions-science.js"></script>
+  const options =
+    getOptions(question);
 
-  <!-- Social Science -->
-  <script src="questions-social.js"></script>
 
-  <!-- English -->
-  <script src="questions-english.js"></script>
+  const savedAnswer =
+    answers[currentQuestion];
 
 
-  <!-- QUIZ JAVASCRIPT -->
-  <script src="test.js"></script>
+  options.forEach((option, index) => {
 
-</body>
-</html>
+    const button =
+      document.createElement("button");
+
+    button.className =
+      "option-btn";
+
+    button.textContent =
+      option;
+
+
+    if (savedAnswer === index) {
+      button.classList.add("selected");
+    }
+
+
+    button.onclick = function () {
+
+      selectAnswer(index);
+    };
+
+
+    optionsContainer.appendChild(button);
+  });
+
+
+  updateQuizHeader();
+
+  updateAnalytics();
+
+  resetQuestionTimer();
+}
+
+
+// ==========================================
+// SELECT ANSWER
+// ==========================================
+
+function selectAnswer(index) {
+
+  answers[currentQuestion] = index;
+
+  skipped[currentQuestion] = false;
+
+  const buttons =
+    document.querySelectorAll(
+      "#optionsContainer .option-btn"
+    );
+
+
+  buttons.forEach((button, i) => {
+
+    button.classList.toggle(
+      "selected",
+      i === index
+    );
+  });
+
+
+  updateAnalytics();
+}
+
+
+// ==========================================
+// SKIP QUESTION
+// ==========================================
+
+function skipQuestion() {
+
+  answers[currentQuestion] = null;
+
+  skipped[currentQuestion] = true;
+
+  moveNext();
+}
+
+
+// ==========================================
+// SAVE AND NEXT
+// ==========================================
+
+function saveAndNext() {
+
+  if (answers[currentQuestion] === null) {
+
+    skipped[currentQuestion] = true;
+  }
+
+  else {
+
+    skipped[currentQuestion] = false;
+  }
+
+  moveNext();
+}
+
+
+// ==========================================
+// NEXT
+// ==========================================
+
+function nextQuestion() {
+
+  moveNext();
+}
+
+
+// ==========================================
+// MOVE NEXT
+// ==========================================
+
+function moveNext() {
+
+  if (
+    currentQuestion <
+    quizQuestions.length - 1
+  ) {
+
+    currentQuestion++;
+
+    loadQuestion();
+
+  }
+
+  else {
+
+    finishQuiz();
+  }
+}
+
+
+// ==========================================
+// PREVIOUS QUESTION
+// ==========================================
+
+function previousQuestion() {
+
+  if (currentQuestion > 0) {
+
+    currentQuestion--;
+
+    loadQuestion();
+  }
+}
+
+
+// ==========================================
+// TIMER
+// ==========================================
+
+function startTimer() {
+
+  stopTimer();
+
+  timerInterval =
+    setInterval(() => {
+
+      timeLeft--;
+
+      updateTimerDisplay();
+
+      if (timeLeft <= 0) {
+
+        timeLeft = 0;
+
+        updateTimerDisplay();
+
+        autoNextQuestion();
+      }
+
+    }, 1000);
+}
+
+
+// ==========================================
+// RESET QUESTION TIMER
+// ==========================================
+
+function resetQuestionTimer() {
+
+  timeLeft = TIME_PER_QUESTION;
+
+  updateTimerDisplay();
+}
+
+
+// ==========================================
+// AUTO NEXT AFTER 1 MINUTE
+// ==========================================
+
+function autoNextQuestion() {
+
+  if (answers[currentQuestion] === null) {
+
+    skipped[currentQuestion] = true;
+  }
+
+
+  if (
+    currentQuestion <
+    quizQuestions.length - 1
+  ) {
+
+    currentQuestion++;
+
+    loadQuestion();
+
+  }
+
+  else {
+
+    finishQuiz();
+  }
+}
+
+
+// ==========================================
+// STOP TIMER
+// ==========================================
+
+function stopTimer() {
+
+  if (timerInterval !== null) {
+
+    clearInterval(timerInterval);
+
+    timerInterval = null;
+  }
+}
+
+
+// ==========================================
+// TIMER DISPLAY
+// ==========================================
+
+function updateTimerDisplay() {
+
+  const timer =
+    document.getElementById("timer");
+
+  if (!timer) {
+    return;
+  }
+
+
+  const minutes =
+    Math.floor(timeLeft / 60);
+
+  const seconds =
+    timeLeft % 60;
+
+
+  timer.textContent =
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(seconds).padStart(2, "0");
+}
+
+
+// ==========================================
+// HEADER
+// ==========================================
+
+function updateQuizHeader() {
+
+  const subjectName =
+    document.getElementById("subjectName");
+
+  const className =
+    document.getElementById("className");
+
+  const questionNumber =
+    document.getElementById("questionNumber");
+
+  const totalQuestions =
+    document.getElementById("totalQuestions");
+
+
+  let subjectText =
+    selectedSubject;
+
+
+  if (selectedSubject === "general") {
+    subjectText = "GENERAL SCIENCE";
+  }
+
+  else if (selectedSubject === "math") {
+    subjectText = "MATHEMATICS";
+  }
+
+  else if (selectedSubject === "social") {
+    subjectText = "SOCIAL SCIENCE";
+  }
+
+  else if (selectedSubject === "english") {
+    subjectText = "ENGLISH";
+  }
+
+  else if (selectedSubject === "all") {
+    subjectText = "ALL SUBJECTS";
+  }
+
+
+  subjectName.textContent =
+    subjectText;
+
+  className.textContent =
+    "Class " + selectedClass;
+
+  questionNumber.textContent =
+    currentQuestion + 1;
+
+  totalQuestions.textContent =
+    quizQuestions.length;
+}
+
+
+// ==========================================
+// ANALYTICS
+// ==========================================
+
+function updateAnalytics() {
+
+  let answered = 0;
+  let correct = 0;
+  let wrong = 0;
+  let skippedCount = 0;
+
+
+  quizQuestions.forEach(
+    (question, index) => {
+
+      const answer =
+        answers[index];
+
+
+      if (answer !== null) {
+
+        answered++;
+
+        const options =
+          getOptions(question);
+
+        const correctAnswer =
+          getCorrectAnswer(question);
+
+
+        let correctIndex =
+          getCorrectIndex(
+            question,
+            options,
+            correctAnswer
+          );
+
+
+        if (answer === correctIndex) {
+          correct++;
+        }
+
+        else {
+          wrong++;
+        }
+
+      }
+
+      else if (skipped[index]) {
+
+        skippedCount++;
+      }
+    }
+  );
+
+
+  document.getElementById(
+    "sideQuestion"
+  ).textContent =
+    (currentQuestion + 1) +
+    " / " +
+    quizQuestions.length;
+
+
+  document.getElementById(
+    "answeredCount"
+  ).textContent =
+    answered;
+
+
+  document.getElementById(
+    "correctCount"
+  ).textContent =
+    correct;
+
+
+  document.getElementById(
+    "wrongCount"
+  ).textContent =
+    wrong;
+
+
+  document.getElementById(
+    "skippedCount"
+  ).textContent =
+    skippedCount;
+
+
+  const elapsed =
+    Math.floor(
+      (Date.now() - quizStartTime) / 1000
+    );
+
+
+  document.getElementById(
+    "timeUsed"
+  ).textContent =
+    formatTime(elapsed);
+}
+
+
+// ==========================================
+// FIND CORRECT ANSWER INDEX
+// ==========================================
+
+function getCorrectIndex(
+  question,
+  options,
+  correctAnswer
+) {
+
+  if (
+    typeof correctAnswer === "number"
+  ) {
+
+    if (
+      correctAnswer >= 0 &&
+      correctAnswer < options.length
+    ) {
+
+      return correctAnswer;
+    }
+
+    if (
+      correctAnswer >= 1 &&
+      correctAnswer <= options.length
+    ) {
+
+      return correctAnswer - 1;
+    }
+  }
+
+
+  if (
+    typeof correctAnswer === "string"
+  ) {
+
+    const answerText =
+      correctAnswer.trim();
+
+
+    // A / B / C / D
+    const letter =
+      answerText.toUpperCase();
+
+
+    if (
+      ["A", "B", "C", "D"].includes(letter)
+    ) {
+
+      return (
+        letter.charCodeAt(0) -
+        "A".charCodeAt(0)
+      );
+    }
+
+
+    // Exact option text
+    const index =
+      options.findIndex(
+        option =>
+          String(option).trim() ===
+          answerText
+      );
+
+
+    if (index !== -1) {
+      return index;
+    }
+  }
+
+
+  return -1;
+}
+
+
+// ==========================================
+// FORMAT TIME
+// ==========================================
+
+function formatTime(seconds) {
+
+  const minutes =
+    Math.floor(seconds / 60);
+
+  const secs =
+    seconds % 60;
+
+
+  return (
+    minutes +
+    ":" +
+    String(secs).padStart(2, "0")
+  );
+}
+
+
+// ==========================================
+// FINISH QUIZ
+// ==========================================
+
+function finishQuiz() {
+
+  stopTimer();
+
+
+  totalTimeUsed =
+    Math.floor(
+      (Date.now() - quizStartTime) / 1000
+    );
+
+
+  let correct = 0;
+  let wrong = 0;
+  let skippedCount = 0;
+
+
+  quizQuestions.forEach(
+    (question, index) => {
+
+      if (answers[index] === null) {
+
+        skippedCount++;
+
+        return;
+      }
+
+
+      const options =
+        getOptions(question);
+
+      const correctAnswer =
+        getCorrectAnswer(question);
+
+
+      const correctIndex =
+        getCorrectIndex(
+          question,
+          options,
+          correctAnswer
+        );
+
+
+      if (
+        answers[index] === correctIndex
+      ) {
+
+        correct++;
+      }
+
+      else {
+
+        wrong++;
+      }
+    }
+  );
+
+
+  const total =
+    quizQuestions.length;
+
+
+  const percentage =
+    total > 0
+      ? Math.round(
+          (correct / total) * 100
+        )
+      : 0;
+
+
+  const qpm =
+    totalTimeUsed > 0
+      ? (
+          total /
+          (totalTimeUsed / 60)
+        ).toFixed(2)
+      : total;
+
+
+  document.getElementById(
+    "finalMarks"
+  ).textContent =
+    correct + " / " + total;
+
+
+  document.getElementById(
+    "finalCorrect"
+  ).textContent =
+    correct;
+
+
+  document.getElementById(
+    "finalWrong"
+  ).textContent =
+    wrong;
+
+
+  document.getElementById(
+    "finalSkipped"
+  ).textContent =
+    skippedCount;
+
+
+  document.getElementById(
+    "finalTime"
+  ).textContent =
+    formatTime(totalTimeUsed);
+
+
+  document.getElementById(
+    "questionsPerMinute"
+  ).textContent =
+    qpm;
+
+
+  document.getElementById(
+    "resultPercent"
+  ).textContent =
+    percentage + "%";
+
+
+  setResultLevel(correct);
+
+
+  let message =
+    "Keep practicing!";
+
+
+  if (correct >= 11) {
+    message = "Excellent! 🔥";
+  }
+
+  else if (correct >= 7) {
+    message = "Very Good! 👍";
+  }
+
+  else if (correct >= 4) {
+    message = "Good Try! 💪";
+  }
+
+
+  document.getElementById(
+    "resultMessage"
+  ).textContent =
+    message;
+
+
+  showScreen("resultScreen");
+}
+
+
+// ==========================================
+// RESULT COLOR LEVEL
+// ==========================================
+
+function setResultLevel(correct) {
+
+  const circle =
+    document.getElementById(
+      "resultCircle"
+    );
+
+  const level =
+    document.getElementById(
+      "resultLevel"
+    );
+
+
+  // Remove old classes
+  circle.classList.remove(
+    "red",
+    "orange",
+    "yellow",
+    "green"
+  );
+
+
+  if (correct >= 11) {
+
+    circle.classList.add("green");
+
+    level.textContent =
+      "🟢 11–15 Correct";
+  }
+
+  else if (correct >= 7) {
+
+    circle.classList.add("yellow");
+
+    level.textContent =
+      "🟡 7–10 Correct";
+  }
+
+  else if (correct >= 4) {
+
+    circle.classList.add("orange");
+
+    level.textContent =
+      "🟠 4–6 Correct";
+  }
+
+  else {
+
+    circle.classList.add("red");
+
+    level.textContent =
+      "🔴 0–3 Correct";
+  }
+}
+
+
+// ==========================================
+// RESTART QUIZ
+// ==========================================
+
+function restartQuiz() {
+
+  startQuiz();
+}
+
+
+// ==========================================
+// PAGE START
+// ==========================================
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    showScreen("subjectScreen");
+  }
+);
